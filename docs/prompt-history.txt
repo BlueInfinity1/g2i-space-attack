@@ -7,13 +7,13 @@ CHAT ORDER
 Only the applicant-selected chat is included in this document. It is not a claim that no other Codex chats were used for the project.
 
 SCOPE AND CUTOFF
-This document contains every retrieved user and Codex text message from the beginning of this chat through the completed major revision, in original chronological order: 22 user messages and 68 Codex messages across 20 turns (project prompt records 001–022).
+The main transcript contains every retrieved user and Codex text message from the beginning of this chat through the completed major revision, in original chronological order: 22 user messages and 68 Codex messages across 20 turns (project prompt records 001–022). A separately labeled addendum at the end contains an English translation of one later Finnish prompt and final response (project prompt record 025), appended at the applicant's request.
 
-The applicant requested the interval immediately before the later form question beginning “Vastaa lomakekysymykseen: Describe one or two iterations and their effect on the game.” That cutoff message and everything after it are excluded. Later gameplay corrections, WebGL building and publication are therefore outside this document. This is a complete message export for the requested interval, not the complete history of the entire project.
+The applicant requested the interval immediately before the later form question beginning “Vastaa lomakekysymykseen: Describe one or two iterations and their effect on the game.” That cutoff message and later messages are excluded from the main transcript. The final-gameplay-corrections pair in the addendum is the one requested exception. Other later exchanges, including WebGL building and publication, remain outside this document. This is a complete message export for the requested interval plus that selected follow-up, not the complete history of the entire project.
 
-Coverage: 2026-10-02T07:33:21Z through 2026-10-02T11:39:36Z (UTC).
+Main transcript coverage: 2026-10-02T07:33:21Z through 2026-10-02T11:39:36Z (UTC).
 
-Message bodies are reproduced verbatim, without summarizing, translating or correcting wording. Follow-ups, interactive questions and replies, progress messages, failed approaches and subsequently corrected claims are retained. In particular, the original assumptions about enemy behavior, the inaudible firing sound, the failed feedback run and the unsuccessful text-rendering diagnoses remain visible alongside their corrections.
+Message bodies in the main transcript are reproduced verbatim, without summarizing, translating or correcting wording. Follow-ups, interactive questions and replies, progress messages, failed approaches and subsequently corrected claims are retained. In particular, the original assumptions about enemy behavior, the inaudible firing sound, the failed feedback run and the unsuccessful text-rendering diagnoses remain visible alongside their corrections. The addendum is explicitly marked as a translation and is not presented as the original English wording.
 
 Turn timestamps are the recorded start of each turn, not separate timestamps for every message. Message numbers and source IDs preserve the original order within each turn, including user replies received during implementation. Tool execution logs, file diffs and non-text attachments are not included in this text-message export. Historical status statements describe the project as it was at that moment.
 
@@ -949,4 +949,31 @@ Changes include:
 Stop Play mode, choose **Space Attack → Open Game Scene**, then Play. **Esc** opens settings. No WebGL build was made.
 
 END OF REQUESTED INTERVAL
-The cutoff message and subsequent messages are intentionally not included.
+The original cutoff applies to the main transcript above. The following translated pair is the requested addition.
+
+========================================================================
+ADDENDUM — CHAT 1: FINAL GAMEPLAY CORRECTIONS
+English translation of a later Finnish prompt and final response
+========================================================================
+
+Source: the Finnish prompt/final-response pair supplied by the applicant. The original Finnish prompt is also preserved in docs/prompts/025-final-side-lines-and-attacker-only-fire.txt. This addendum contains only the supplied pair, not the intermediate progress messages from that later turn.
+
+Displayed time supplied with the exchange: 14:48.
+Codex UI work-duration label: 3 min 6 s. This is not a measurement of the applicant's active working time.
+
+USER — English translation
+----------------------------------------
+Make a couple more small corrections. Right now, we have long vertical blue lines on the left and right sides of the game screen. Remove them completely, because they serve no purpose. The other thing is that an enemy must not start shooting until it has started moving. Otherwise, it does not match the original game's logic. These are probably the last changes I will ask for.
+
+CODEX (final response) — English translation
+----------------------------------------
+Done:
+
+- Both vertical blue side lines have been removed.
+- Enemies only shoot after starting their diagonal attack movement. They do not shoot while in formation.
+
+All 21 Play Mode tests passed. The prompt has been saved.
+
+Stop Play mode and reopen the scene via Space Attack → Open Game Scene before testing.
+
+END OF TRANSLATED ADDENDUM
