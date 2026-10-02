@@ -1,0 +1,86 @@
+SPACE ATTACK - PROPOSED ARCHITECTURE
+
+Status: first Unity Editor implementation completed after prompt 011. See README.md for operation and docs/verification.txt for evidence and limits. The user approved separate config categories in prompt 006 and the scoring formula in prompt 011. Prompts 007 and 008 establish the complete initial formation and diagonal-only, constant-speed attacks. The earlier offscreen-spawn and straight-down movement proposals are superseded.
+
+Prompt 022 authorized the full feedback batch after the explanation of the lower boundary line. The code, serialized assets and UI now include simpler instructions, the corrected HUD, proportional energy bar, paused settings menu, outlined white score popups, formation motion, random diagonal direction changes, timed enemy fire, louder distinct firing sounds and player alpha blinking. The sector-clear message and enemy destruction particles remain. See docs/playtest-feedback.txt for the collected requests, README.md for operation and docs/verification.txt for checks and limits. Earlier deferral instructions described the feedback-collection phase and are superseded by prompt 022.
+
+Prompt 018's formation movement and enemy shooting are implemented. They supersede the static-formation assumption and earlier notes treating enemy shooting as optional. Prompt 022 replaces the blue invulnerability outline with alpha blinking. The lower line had no game-event flashing behavior: its parenting to the drifting starfield and subpixel thickness could produce shimmer. It now belongs to a static border group and is thicker. Prompt 025 removes both vertical side lines and permits firing only after an enemy begins its diagonal attack; formation sway alone does not enable firing. Historical design notes below are retained; current code/configs and README.md take precedence.
+
+Current implementation scope (approved in prompt 011): fresh Unity project, orthographic camera, one Game.unity scene, and Unity Editor testing first. Do not make a WebGL build in this iteration. Browser delivery remains a later project requirement.
+The user approved the proposed scoring algorithm in prompt 011; do not spend implementation time reverse-engineering the original scoring formula. Clockify remains the applicant's time source.
+
+Components:
+- GameController: start/playing/game-over state, score, start and restart orchestration.
+- ScoreCalculator (proposed after prompt 009): pure calculation of a kill award from enemy type/base score, pre-death formation/attacking state and vertical depth. GameController applies the award once to the session total.
+- PlayerController: keyboard movement, playfield bounds and fire input.
+- ShipHealth: current/max health, damage, brief player invulnerability, damage/death events. Player health is configurable. Every enemy is fixed at 1 health with no damage invulnerability, so one valid player projectile hit destroys it.
+- Weapon: firing cadence, projectile spawning and team ownership; shared by player/enemy.
+- Projectile: travel, lifetime, 2D trigger hits, team filtering and single-hit consumption.
+- EnemyController: formation/attacking states, constant-speed diagonal-only attack movement and defeat notification; weapon use only if enemy firing is included after reference clarification.
+- WaveDirector: complete formation setup at stage start, selection of existing enemies to attack, stage completion and bounded difficulty scaling.
+- HUDView: score, health, wave, controls, start screen, game-over screen and restart button.
+- FeedbackController: impact flashes, explosions, audio and restrained camera shake.
+- Config ScriptableObjects: PlayerConfig, EnemyConfig, WeaponConfig, WaveConfig, FeedbackConfig and the proposed ScoringConfig; a thin GameConfig root references these assets for setup.
+
+The config categories are implemented under Assets/SpaceAttack/Scripts/Data and Assets/SpaceAttack/Settings. docs/game-config-proposal.txt preserves design rationale; the C# classes and config assets are the implementation source of truth.
+
+Enemy types and scoring proposal after prompt 009: use three EnemyConfig assets sharing one EnemyController. Proposed formation-kill values from the user's observations are red 30, green 40 and yellow 60. Moving enemies use a shared 4x-to-10x multiplier increasing with vertical depth, rounded to tens; the level number does not affect score. Award only on a player-projectile kill, once, using state/position captured before death cleanup. See docs/scoring-proposal.txt. This approximates the described behavior; the exact original moving-score formula has not been measured. This supersedes the original single-type/flat-score proposal.
+
+One-hit enemy rule clarified in prompt 010: red, green and yellow enemies all die from one valid player projectile hit, whether in formation or attacking, at every level. Remove configurable enemy baseHealth from the current scope; use fixed 1-health enemies and player projectile damage 1. The previous reference to nonlethal hits was generic wording, not a proposed tougher enemy type. Award-once logic prevents duplicate awards from repeated collision/death callbacks. Player health and invulnerability remain separate mechanics.
+
+Flow: input -> player/weapon -> projectile -> ship health -> death/damage events -> score/waves/UI/feedback. Explicit Inspector references and small events; no dependency injection framework or global service locator.
+GameController owns session state and score. ShipHealth owns health. WaveDirector owns wave progression. Restart clears spawned entities and resets session, health, weapons and waves; subscriptions must not accumulate.
+
+Scene: Game systems, orthographic Main Camera, Playfield, Player, Canvas (HUD, start and game-over panels), EventSystem, feedback/audio.
+
+Corrected enemy formation proposal following prompts 007 and 008:
+Game
+  Systems (GameController, WaveDirector)
+  Playfield
+    FormationSlots
+      Slot_01
+      Slot_02
+      ...
+  Runtime
+    Enemies
+    Projectiles
+    Effects (reserved for polish)
+  Player
+  Main Camera
+  Canvas
+  EventSystem
+- The user clarified that all stage enemies are visible at the beginning, and selected existing enemies move diagonally down-left or down-right at constant speed. There is no straight-down attack direction. This is a confirmed user requirement.
+- The initial web fetch and retry in prompt 007 were throttled. During prompt 008, browser access succeeded and the opening video frames at 0:00, 0:05 and approximately 0:09 were inspected. The full formation visible at 0:05 has six rows: 2 yellow, 5 red, 7 green, then three rows of 9 red enemies, totaling 41. See docs/reference-observations.txt. This does not imply the entire video has been reviewed.
+- Remove the earlier EnemySpawnArea/SpawnLeft/SpawnRight design. Those endpoints were intended for a stream of enemies entering from above and do not fit the clarified behavior.
+- FormationSlots contains 41 authored positions following the opening reference layout, using nine column positions: top row columns 3 and 5; second row columns 2 through 6; third row columns 1 through 7; bottom three rows columns 0 through 8 (zero-based column indices). Use even column/row spacing and place the formation in the upper playfield below the HUD. The proposed initial game reuses this shape each level; later-level layouts have not been verified. Colors use Unity primitives. Prompt 009 adds distinct type scores: 32 red, 7 green and 2 yellow enemies use their respective EnemyConfig assets. Different health or movement behaviors have not been requested.
+- WaveDirector receives explicit scene references to the slot transforms and the Enemies parent. Stage setup creates/places the entire stage formation before play begins; all its enemies are visible together. Runtime instantiation is an implementation detail, not a timed entry mechanic.
+- WaveDirector then chooses existing eligible formation enemies to start an attack. EnemyController changes from InFormation to Attacking and moves only down-left or down-right. Normalize the chosen direction once so both directions travel at the configured constant world-units-per-second speed. No straight-down direction, acceleration or target tracking. Keep speed fixed in the initial design; increase difficulty through shorter attack-selection intervals, within a bounded multiplier and concurrent-attacker cap. The exact diagonal angle has not been measured from the video.
+- Formation slots define initial positions; Runtime/Enemies contains live enemies, including attackers. Do not parent enemies to the camera or remove attackers from stage tracking when they leave their slots.
+- Keep Game, Runtime and the entity containers stationary, with unit scale and no rotation, so organization does not change movement or physics behavior.
+- WaveDirector tracks registered live enemies explicitly, including attackers. A stage finishes when no unresolved enemies remain. Per the user's answer in prompt 012, attackers that leave the playfield are removed without points; they count as resolved for stage completion. Death/contact/escape callbacks cannot resolve an enemy twice.
+- The Enemies parent keeps the Hierarchy tidy and supports cleanup. Projectiles have their own parent so they do not inherit a ship's motion or disappear when that ship is destroyed.
+- Restart stops attack scheduling, clears/despawns runtime entities and resets tracking before initializing the complete next formation. Cleanup does not award score. Future pooling would keep inactive instances separate from live-enemy tracking; pooling is not required by this proposal.
+- Reference details not reconstructed: later-level layouts, formation-wide motion, exact angle/timing, and enemy firing. The implemented design reuses the observed opening formation, keeps waiting enemies stationary, uses 35-degree inward diagonals at 3.6 units/second, and has no enemy shooting. These are explicit prototype choices, not claims about the reference. Escaped enemies are removed without points as the user requested.
+Assets: Scripts/Gameplay, Scripts/Presentation, Scripts/Data, Scenes, Prefabs, Art, Audio, Settings.
+Author scene/prefab YAML and stable .meta GUIDs directly in the code editor as requested. Validate references and imports in Unity. Do not hide the whole scene behind a runtime bootstrap script.
+
+Visual asset and polish constraints from prompt 004:
+- Use Unity-supported primitives and built-in rendering/UI features for ships, enemies, projectiles and other visuals. Compose shapes and colors to make gameplay readable.
+- Do not generate, download or import external artwork. Do not use image-generation tools, including image generation available through Codex. This is the user's chosen project constraint, not a verified interpretation of the employer's rules.
+- All code must be written through Codex. Programmatic visual effects using Unity features are allowed.
+- Core gameplay was verified first (16 Edit Mode + 8 initial Play Mode checks). Then the polish pass added optional shake/ship flashes, cube sparks, floating scores and synthesized sound. Full-screen flashes default off. FeedbackConfig and runtime F/M overrides control effects/audio.
+- Any future Art folder is only for project-authored materials or other primitive-based visual resources; it does not authorize external artwork.
+
+Rule interpretation clarified in prompt 005:
+The supplied wording, "Use Codex only for all the code. No other AI tools.", does not explicitly prohibit all artwork. It requires code to come through Codex and prohibits other AI tools. Accessing a separate image-generation model through Codex is not clearly authorized by that wording; do not assume the interface makes it compliant. The employer's intended interpretation has not been independently confirmed. Using Unity primitives with Codex-written effects is a justified conservative choice that fits the stated code/design evaluation and the user's explicit visual constraints. Polish can come from composition, colors, motion, readable UI and feedback without generated art. Keep the user's no-external-artwork constraint in force.
+
+Time-tracking correction from prompt 003:
+The 120-minute limit concerns the applicant's active work, including their own reflection. Earlier reported totals of 3/120 and 5/120 incorrectly used assistant session elapsed time. Those totals are withdrawn. The two historical measurements are preserved in docs/assistant-session-log.csv and are not applicant work-time entries.
+The assistant cannot observe or accurately infer the applicant's active work from message timestamps, tool runtimes or its own activity. In prompt 006 the user selected their own Clockify tracking as the source of truth. Applicant elapsed/remaining active time is unknown until the user supplies a Clockify duration. Only record user-reported Clockify durations; do not infer or backfill durations or run an assistant-managed applicant timer. No Clockify access or integration was requested. See docs/time-tracking.txt and docs/time-log.csv.
+The earlier 10/55/20/20/15 minute stage allocation was only a planning estimate, not measured time. Reserve time within the applicant's confirmed budget for their own play-test and reflection. Confirm the remaining budget before committing to a time-sensitive implementation schedule.
+
+Verification plan: complete 41-enemy formation visible at stage start with row counts 2/5/7/9/9/9; existing enemies selected to move only diagonally down-left/down-right at constant speed; keyboard movement/firing and bounds; collision/team rules; health/invulnerability; exactly one score award per defeat; stage completion including active attackers and increasing difficulty between stages through attack cadence; start/game-over/restart and clean repeated restarts; readable browser layout; actual WebGL browser run. Record only checks actually performed. Applicant's personal play-test and reflection remain their responsibility.
+
+Prompt recording: preserve every subsequent human task prompt verbatim in a numbered docs/prompts text file before acting. These files contain user-authored project instructions; platform-generated environment/plugin listings are not task prompts. No other AI tools may generate code. No subagents were used in this planning session. Do not generate the applicant's reflection in their voice.
+
+Initial observations: workspace was empty and was not a Git repository. Text-based reference access failed twice; browser access succeeded during prompt 008. The first game implementation now exists and has been tested in Unity; consult docs/verification.txt for exact checks. No WebGL build was made.

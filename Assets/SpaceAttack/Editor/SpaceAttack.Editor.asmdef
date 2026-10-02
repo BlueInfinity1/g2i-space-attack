@@ -1,0 +1,5 @@
+{
+  "name": "SpaceAttack.Editor",
+  "references": ["SpaceAttack.Runtime", "Unity.ugui"],
+  "includePlatforms": ["Editor"]
+}

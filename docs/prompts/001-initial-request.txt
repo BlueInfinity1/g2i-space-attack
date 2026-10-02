@@ -1,0 +1,26 @@
+I’m applying for a job at G2I. They need game developers who can evaluate the quality of game code and design to help train AI. Here are the instructions for completing the task. Could you start working on it? Unity would probably be the best choice, since it’s the game development tool I’m most familiar with. Please note that all prompts must be recorded, so save those as well. The project is a Space Attack clone.
+
+Before starting, could you tell me what architecture and class structure you propose for our Unity project? Edit the scene files directly in the code editor.
+
+
+
+Here are the requirements for the project:
+
+
+
+The task: build Space Attack, a small, polished browser arcade game where the player pilots a spaceship against waves of enemies. Reference: [https://www.youtube.com/watch?v=jYIC8ADIArc](https://www.youtube.com/watch?v=jYIC8ADIArc)
+
+It must include:
+
+- Keyboard movement and firing, with on-screen instructions
+- Enemy waves, working collisions, a visible score and health/lives
+- Increasing difficulty
+- A start screen, game over and restart
+
+Rules:
+
+- 2 hours of active work max, including your reflection. Track your time.
+- Use Codex only for all the code. No other AI tools.
+- Start a fresh project and play-test it yourself.
+- Save all your prompts and write the reflection in your own words.
+- If something is unfinished, submit what you have and explain the issue.

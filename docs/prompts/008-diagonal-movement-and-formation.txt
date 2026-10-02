@@ -1,0 +1,1 @@
+One correction. If we want to mimic clearly what we see in the video, then the enemies never move down directly. It's always down left or down right, and this happens at a constant speed. Also, what kind of a formation are you going to use for the enemies at the start of each level?

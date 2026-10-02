@@ -1,0 +1,1 @@
+Jes, oikein hyvä. Sitten voitko Buildata tästä WebGL-version, jotta saamme sen tuonne Codex Sitesiin hostattavaksi. Tässä varmaan järkevin on käyttää Brotli-kompressiota, jos vain Codex Sites pystyy sen käsittelemään, vai mitä olet mieltä?

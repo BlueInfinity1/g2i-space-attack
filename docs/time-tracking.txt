@@ -1,0 +1,12 @@
+APPLICANT ACTIVE TIME
+
+Source of truth: the applicant's own Clockify tracking, selected in prompt 006.
+Current total: not supplied from Clockify. Remaining time out of 120 minutes: unknown.
+
+The user clarified that the limit applies to their active working time, not assistant work time. Chat timestamps and assistant tool sessions cannot establish when the user is actively thinking, writing prompts, reviewing code, testing, writing the reflection or away.
+
+Correction: the previously reported 3/120 and 5/120 totals were assistant session wall-clock measurements rounded up to whole minutes. They are not valid measurements of applicant active work and must not be used in the submission. The original measurements and activities are preserved in assistant-session-log.csv with clear labels.
+
+The applicant manages their active-work timer in Clockify, including reading/reviewing, prompting, play-testing and reflection. The assistant may record Clockify durations the applicant supplies. Do not start an assistant-managed timer or attempt to measure activity automatically. No Clockify access or integration was requested.
+
+Record confirmed applicant intervals/durations in time-log.csv. Do not treat an empty duration as zero, fabricate a baseline, infer active time from gaps between messages or subtract assistant time from the applicant's allowance. If both a total and component intervals are supplied, reconcile them rather than double-counting.

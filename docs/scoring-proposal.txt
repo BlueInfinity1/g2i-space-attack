@@ -1,0 +1,43 @@
+ENEMY TYPES AND SCORING PROPOSAL
+
+Status: formula approved in prompt 011 and implemented in ScoreCalculator.cs, EnemyConfig assets and ScoringConfig.asset. This is the agreed approximation of the behavior described by the user; exact original-game scoring reconstruction is intentionally out of scope.
+
+Enemy variants
+The original plan started with one enemy type. Following prompt 009, propose three EnemyConfig assets sharing one EnemyController implementation and movement behavior:
+- Red: formationScore 30; 32 slots in the observed opening formation.
+- Green: formationScore 40; 7 slots.
+- Yellow: formationScore 60; 2 top slots.
+The base scores are the user's tentative observations, adopted as proposed defaults; they were not independently measured from score changes. Distinct colors/point values do not require new controller subclasses or different movement behavior. Prompt 010 confirms that every enemy type dies from one valid player projectile hit, at every level and in either movement state. No multi-hit enemy types are planned.
+
+Scoring algorithm
+- If the enemy is InFormation when killed by a player projectile, award its formationScore.
+- If it is Attacking, award a multiplier from 4x to 10x based on its vertical depth, rounded to the nearest 10 points.
+- Use two fixed playfield reference lines: formationBottomY and playerDangerLineY, with formationBottomY > playerDangerLineY in Unity world coordinates. Place the latter near the bottom player area. Resolve/validate them during stage setup; do not derive them from the current surviving formation, live player position or shaken camera.
+- p = clamp01((formationBottomY - enemyYAtDeath) / (formationBottomY - playerDangerLineY)).
+- attackMultiplier = 4 + (10 - 4) * p.
+- attackScore = roundToNearest10(formationScore * attackMultiplier).
+- For nonnegative values, roundToNearest10(value) = 10 * floor(value / 10 + 0.5), so ties round upward.
+An attacker within or above the formation's lowest row has p = 0. At/below the danger line it has p = 1. The bonus is based on actual height when defeated, not time alive, diagonal path length or distance to the player's current position. At a given height, left/right attackers of the same type receive the same score. Movement remains constant-speed and diagonal-only.
+
+Example table
+Condition                         Multiplier   Red   Green   Yellow
+In formation                      1x           30    40      60
+Attacking, at formation bottom     4x           120   160     240
+Attacking, halfway to danger line  7x           210   280     420
+Attacking, at danger line          10x          300   400     600
+
+The 600-point example is a yellow enemy at the danger line in this proposal. It is not a claim that the user observed a yellow enemy or that all nearby enemies should award 600. The multipliers are starting values for play-testing and can be tuned without altering base type values or the algorithm. No score multiplier is applied for level number.
+
+Award semantics
+- The first valid player projectile hit destroys the enemy and awards its score once. All enemies are one-hit kills; the earlier nonlethal-hit wording was generic and does not describe an in-scope mechanic.
+- Capture pre-death state, world position and type before cleanup/despawn resets them. Duplicate collision/death callbacks cannot award twice.
+- Enemy-player collision, escaping, scene cleanup, restart and despawn alone do not award points.
+- GameController owns the total score. A small pure ScoreCalculator calculates one award from the captured data; it does not mutate the shared config or scene.
+
+Configuration
+- EnemyConfig: formationScore (replaces scorePerKill), alongside movement/contact-damage values. Enemy health is fixed at 1, not a per-type tuning field. Red/green/yellow use separate assets; visual colors are set by their prefab/renderer setup.
+- ScoringConfig: attackMinMultiplier = 4, attackMaxMultiplier = 10, scoreRoundingStep = 10. Require attackMaxMultiplier >= attackMinMultiplier >= 1 and a positive rounding step.
+- GameConfig: reference the new ScoringConfig alongside the existing config categories.
+- The scene supplies the fixed formation/danger-line coordinates to ScoreCalculator through the owning component; do not put scene Transform references in reusable config assets.
+
+Implementation verification targets, not tests already run: all three enemy types die from one valid player projectile hit, in formation and attacking, across levels; all three formation scores; sample table and rounding; monotonic/capped rewards for descending attackers; equivalent left/right rewards at equal heights; no level-number multiplier; no score for collision/escape/cleanup; exactly one award per player kill even with repeated death/collision callbacks; unchanged score if camera shake or player movement occurs without moving the enemy.

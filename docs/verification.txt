@@ -1,0 +1,89 @@
+UNITY EDITOR ITERATION - VERIFICATION
+
+FINAL SMALL CORRECTIONS - PROMPT 025 (2026-10-02)
+
+- Removed both vertical blue side borders directly from Game.unity, including their components and parent references. Other scene object IDs and the lower horizontal boundary are preserved. Updated tools/author_assets.py so future authoring does not restore them.
+- EnemyController allows automatic firing only in the Attacking state. Waiting enemies remain silent even when their weapon cooldown has elapsed or they move horizontally with the formation. The existing shot interval and initial delay are unchanged.
+- TestResults/PlayMode-Corrections.xml: 21 passed, zero failures/skips. The added regression test checks all three enemy types: ready weapons produce no shots in formation, then the three attackers move downward and each fires. Existing cooldown, collision, pause, audio, UI and gameplay tests also pass.
+- The 32-second scripted Editor play reached stage two with 72 kills, 24 enemy shots, two damage events, no restarts and at most eight live projectiles. This confirms the reduced firing pressure in the scripted scenario; the applicant still judges game balance through personal play.
+- Scene reference checks found no dangling or duplicate local object IDs. Source assets exactly matched the workspace-local validation copy. No C# compilation errors or runtime exceptions appeared in Logs/PlayMode-Corrections.log.
+- Updated screenshots are in TestResults/FinalCorrections/Review-Batch and TestResults/FinalCorrections/Live-Review. The gameplay image was inspected to confirm that both side lines are absent.
+- No WebGL or standalone build was made. Prompt 025 is saved verbatim; Clockify remains the applicant's time source.
+
+PREVIOUS FEEDBACK BATCH AUTHORIZED IN PROMPT 022 (2026-10-02)
+
+Implemented the collected requests from prompts 013-022:
+- Plain start instructions, one control per row, correct Space Attack title, stage number without an enemy counter, and no scoring instructions or stage/contact overlay. Sector-clear transitions remain.
+- Fixed-width current/max energy bar, stacked right-hand controls, and a paused settings menu with eight independent effect/audio sliders. Preferences remain separate from assets and survive restarts.
+- Full formation moves between configurable X limits, with speed increasing through capped difficulty. Diagonal attackers can reverse their horizontal direction after a delay, with a growing random chance and unchanged attack speed.
+- Enemies fire damaging orange projectiles downward on independent fixed six-second timers, with staggered first shots. Cleanup of a previous bullet never resets the firing timer. Player/enemy weapon assets are separate.
+- White outlined score popups. The enemy destruction particle prefab, default particle count, motion and lifetimes are preserved.
+- Player invulnerability uses alpha 1/0.5 alternating every 120 ms for the existing 1.2-second duration; no blue box. With blinking disabled, steady 0.5 alpha remains as the damage-protection cue.
+- Lower and side borders are separate from the moving stars and thicker. There was no event-driven flashing or enemy-crossing trigger; starfield parenting and subpixel thickness could produce shimmer.
+- Louder common audio gain and distinct code-generated player/enemy laser tones. All sound still routes through one shared 2D AudioSource.
+
+Evidence
+- TestResults/EditMode-Batch.xml: 18 passed. Includes score invariants, difficulty bounds and the delayed/growing/capped turning probability.
+- TestResults/PlayMode-Final.xml: 20 passed, zero failures/skips. Includes formation motion/reversal, constant-speed turns, enemy bullets damaging the player, fixed cooldown independent of bullet cleanup, pause/resume across states, independent preferences without config edits, energy scaling, blink timing/restore, audio output, visual captures, scripted play and initial gameplay regressions.
+- The final 32-second scripted Editor play recorded 94 kills, 135 enemy shots, 11 damage events, three restarts and at most 27 simultaneous projectiles. This movement pattern does not dodge intelligently and stayed on stage one; next-stage behavior is separately covered by the integration tests.
+- These are 38 distinct automated tests (18 Edit Mode and 20 Play Mode). Focused reruns are not counted as additional distinct tests.
+- Logs/Validation-Review-Final.log: SPACE_ATTACK_VALIDATION_OK. Authored scene/prefab/config references, 41 typed formation slots, separate enemy weapon settings, eight settings sliders and static border parenting are valid.
+- TestResults/Audio-Batch/levels.txt records actual firing-event AudioSource.GetOutputData peaks of approximately 0.17 for player fire and 0.115 for enemy fire at shared gain 0.72. This establishes non-silent runtime output at the Unity source; it is not a claim about hardware speaker loudness.
+- Normal Game view screenshots are in TestResults/Live-Review; offscreen two-size UI/contrast captures are in TestResults/Review-Batch. The normal captures use the actual Screen Space Overlay UI and include live enemy bullets, kills, damage, scores and settings.
+- Start, settings, gameplay, game-over and white outlined scores over all three enemy colors were inspected. Settings fit at 960x720; additional scene captures are 1280x900 and normal Game view captures are 1920x1080.
+- Repeated image previews appeared to omit parts of text during review. Direct checks of the source PNG data showed intact text; the final title retained exactly 1,268 cyan pixels at each of four gameplay captures. The play-through now checks title pixel coverage independently of the preview. Speculative font/material workarounds were removed; normal Unity font and UI material handling remains.
+- No C# compilation errors or runtime exceptions appeared in the final Play Mode run.
+
+Review details and limits
+- Tests ran in a workspace-local validation copy at TestResults/EditorValidation so the user's open Editor project did not need to be closed. Unity command-line documentation: https://docs.unity.com/en-us/engine/6000.3/manual/unity-editor/command-line-arguments/editor
+- Before regenerating assets, a staged baseline matched all existing authored assets exactly. Only reviewed generated Assets were copied back; existing ProjectSettings were preserved. Scene and prefab edits remain direct YAML authoring.
+- The original inaudible-shot report was not dismissed as merely a volume preference. Runtime event-to-audio-output measurement now verifies playback; the generated firing amplitude/duration and overall gain have both increased. The applicant should check the result on their speakers/headphones.
+- Scripted Editor play and rendered captures do not replace the applicant's own keyboard play-test, subjective balance review or own-word reflection. Clockify remains the applicant's time source; no active minutes were inferred.
+- No WebGL or standalone player build was made. No imported artwork, recordings or external generative tools were used.
+- Stop Play mode and reopen Game.unity from disk before reviewing the changed scene. Space Attack > Open Game Scene provides a shortcut; press Play, then Enter. Escape or Settings opens the paused menu.
+
+HISTORICAL INITIAL IMPLEMENTATION VERIFICATION (before the feedback batch)
+
+Engine: installed Unity 6000.3.11f1. Fresh project created in the existing workspace.
+Scope: Editor implementation and testing only. No WebGL or standalone player build was produced.
+
+Implemented
+- One directly authored Game.unity scene, explicit scene references and stable metadata GUIDs.
+- Complete 41-enemy formation at each stage start: 32 red, 7 green, 2 yellow.
+- Three config variants sharing one controller; all enemies die from one player shot.
+- Only diagonal down-left/down-right attacks at fixed speed. Attack cadence increases between stages, up to a cap.
+- Missed attackers are removed without points, per the user's answer. No enemy reentry or enemy shooting.
+- Approved formation scores and 4x-to-10x descending-attack rewards rounded to tens; no stage score multiplier.
+- Horizontal keyboard movement, hold-to-fire, real 2D trigger collisions plus projectile sweep checks.
+- Three player hull points, temporary damage invulnerability with a steady shield outline, score and stage HUD.
+- Start screen, game over, buttons/keyboard controls and clean restart.
+- Optional camera shake, player flash, screen overlay (off by default), cube sparks, score popups and synthesized sound. F reduces effects; M mutes. Runtime preferences survive restart without changing assets.
+- Unity built-in cube geometry and font only; no external/generated artwork or imported audio.
+
+Automated evidence
+- TestResults/EditMode.xml: 16 passed, 0 failed. Base scores, all nine table examples, clamping/monotonicity/rounding, capped difficulty and single death notification/reset.
+- TestResults/PlayMode-Release.xml: 10 passed, 0 failed, 0 skipped in the graphics-enabled Unity Editor.
+  Tests cover complete formation/types, one-hit deaths and duplicate-score prevention, diagonal constant velocity, zero-score escapes, an actual spawned projectile hitting an enemy and being consumed, next-stage formation, damage invulnerability/game over/repeated restarts, actual physics movement to both bounds, comfort preference persistence, and UI/render capture.
+- Logs/Validation-Final.log: SPACE_ATTACK_VALIDATION_OK. The scene has 41 correctly typed slots; scene scripts, split config references, prefabs and custom materials load correctly.
+- No C# compile errors or runtime exceptions in the final Play Mode run.
+
+Visual review
+Rendered and inspected TestResults/Review/start.png, gameplay.png, score-feedback.png, game-over.png and gameplay-small.png. Main captures are 1280x900; the smaller gameplay capture is 960x720. Controls, scores and menus fit in both reviewed sizes. Captures are actual Unity renders. Audio was muted during capture; normal gameplay starts with audio enabled.
+The capture test invokes the wired Start/Restart button callbacks and renders through a temporary camera target; ordinary gameplay uses a screen-space overlay Canvas. This is automated Editor verification, not a physical keyboard/mouse play-test or a claim about subjective audio/game feel.
+
+Issues found and fixed
+- Corrected the external shader reference type in directly authored material YAML.
+- Moved native MaterialPropertyBlock allocation from instance initializers to Awake for Unity serialization safety.
+- Strengthened the movement test to actually reach both playfield edges through Rigidbody2D movement.
+- Checked that restart removes old enemies/projectiles and does not duplicate event subscriptions or scores.
+
+Review limits / deliberate choices
+- Applicant should personally play-test the keyboard controls, balance, audio level and effects in the Editor. The original task requires the applicant's own play-test and own-word reflection.
+- This is an agreed approximation. Exact original movement angles, selection timing, moving-formation behavior and later-level layouts were not reconstructed. The current fixed 35-degree inward attack angle can be tuned in EnemyConfig.
+- Every later stage currently reuses the same observed opening layout. Difficulty comes from attack cadence, not enemy health or speed.
+- Session best and comfort preferences persist across restarts only, not across Editor sessions.
+- Keyboard control is desktop-only in this iteration. Browser build/compatibility remain intentionally deferred by the user.
+- Personal active time remains the user's Clockify record; no user duration has been supplied or inferred.
+
+How to review
+Open Assets/SpaceAttack/Scenes/Game.unity in Unity 6000.3.11f1, press Play, then Enter or Launch. A/D or left/right arrows move; hold Space to shoot. R or Enter restarts after game over. F and M control comfort/audio. See README.md and the Settings assets for tuning.

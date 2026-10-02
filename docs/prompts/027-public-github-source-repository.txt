@@ -1,0 +1,1 @@
+Onko tämä jossakin Source-repositoriossa vielä? Jos ei ole, niin pusketaan tämä Blue Infinity One GitHubiin ja tehdään repository public, jotta se voidaan jakaa tuossa lomakkeessa. Voitko lähteä repoa muodostamaan

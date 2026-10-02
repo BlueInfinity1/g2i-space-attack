@@ -1,0 +1,5 @@
+{
+  "name": "SpaceAttack.Runtime",
+  "rootNamespace": "SpaceAttack",
+  "references": ["Unity.ugui"]
+}

@@ -1,0 +1,84 @@
+GAME CONFIG - PROPOSED FIELDS
+
+Status: config categories and the approved scoring formula are implemented after prompt 011. This document retains the design discussion; Assets/SpaceAttack/Scripts/Data and Assets/SpaceAttack/Settings hold the actual fields/defaults. Runtime session values remain separate from config assets. All 41 enemies begin on screen; attackers move only diagonally at constant speed. The user's prompt 012 answer specifies removal without points on escape.
+
+Review additions implemented after authorization in prompt 022
+- WaveConfig: formationMinOffsetX=-2.5, formationMaxOffsetX=2.5, formationSpeed=0.4 units/second. Speed uses the existing capped difficulty multiplier. Bounds also account for the full formation width.
+- EnemyConfig.weapon references a separate EnemyWeapon.asset: fixed six-second interval, speed 4.8, damage 1, lifetime four seconds. Initial delays are staggered; later shots are independent of projectile cleanup and player proximity. Prompt 025 restricts firing to diagonal attackers; enemies waiting in formation cannot shoot, even if their initial delay has elapsed.
+- EnemyConfig: directionChangeDelaySeconds=0.8, directionCheckIntervalSeconds=0.4, directionChangeInitialChance=0.06, directionChanceGrowthPerSecond=0.06, directionChangeMaximumChance=0.4. Only the horizontal velocity sign changes; downward speed and total attack speed stay constant.
+- FeedbackConfig: invulnerabilityBlinkIntensity=1, invulnerabilityBlinkIntervalSeconds=0.12, invulnerabilityMinimumAlpha=0.5, masterVolume=0.9, sfxVolume=0.8. Other effect defaults and the enemy destruction effect are preserved.
+- SettingsView exposes eight effect/audio sliders while GameController pauses the game. FeedbackPreferences holds runtime overrides separately from the assets. Reduced-effects mode uses steady invulnerability transparency when blinking is off.
+- These current settings supersede conflicting wording in the preserved original proposal below. README.md describes current behavior; docs/verification.txt records evidence and limits.
+
+Config asset structure
+- GameConfig: a thin root referencing PlayerConfig, the available EnemyConfig assets, WaveConfig, FeedbackConfig and the proposed ScoringConfig from prompt 009. It does not duplicate their values or act as a global singleton.
+- PlayerConfig: player movement, health and invulnerability defaults; a reference to its WeaponConfig.
+- EnemyConfig: enemy attack movement, contact damage and score defaults; an optional WeaponConfig reference if enemy firing is included. One asset per implemented enemy type. All enemy types die from one valid player projectile hit, per prompt 010; enemy health is not a difficulty or type tuning value.
+- WeaponConfig: shot interval, projectile speed, damage and lifetime. The same C# type is used for distinct player/enemy weapon assets. Variants can reuse or replace these assets explicitly.
+- WaveConfig: timing/limits for selecting existing enemies to attack, stage pacing and bounded difficulty progression. Initial enemy count comes from the authored formation slots.
+- FeedbackConfig: shake, flashes, decorative particles, background motion and audio defaults.
+- ScoringConfig: shared attack-score multipliers and rounding. EnemyConfig holds the score specific to each enemy variant.
+Components receive only the focused config they need through explicit references/initialization. The root supports scene setup, without every gameplay component depending on the entire root.
+
+Rationale
+The initial single-asset proposal minimized setup and kept balancing in one Inspector for a small, time-limited game. Its downside is coupling unrelated settings and making independently reusable ship/weapon variants awkward. The split adds a few simple data assets while allowing reuse and focused tuning. Composition is sufficient; no config inheritance hierarchy or dependency injection framework is proposed.
+
+Player (PlayerConfig)
+- moveSpeed: Unity world units per second.
+- maxHealth: positive integer.
+- invulnerabilitySeconds: grace period after damage.
+
+Weapons (WeaponConfig; distinct player/enemy assets)
+- fireIntervalSeconds: positive delay between shots.
+- projectileSpeed: positive world units per second.
+- projectileDamage: positive integer; player projectile damage defaults to 1. All enemies have fixed 1 health, so every valid player projectile hit kills. Enemy projectile damage only matters if enemy firing is included.
+- projectileLifetimeSeconds: positive duration before cleanup.
+
+Enemies (EnemyConfig)
+- Enemy health is fixed at 1 for every type and level, rather than exposed as baseHealth. No enemy armor, invulnerability or multi-hit enemies are in scope. If ShipHealth is reused, initialize enemies with 1 health and no damage invulnerability; player health remains configurable through PlayerConfig.
+- attackSpeed: positive world units per second; fixed throughout each attack and across levels in the initial design. Only normalized down-left/down-right directions are allowed; no straight-down option. Formation enemies occupy their assigned slots until selected to attack.
+- attackAngleFromVerticalDegrees: diagonal angle, strictly between 0 and 90 degrees; the same magnitude for left/right directions. The exact reference angle has not yet been measured. Direction remains fixed during an attack.
+- contactDamage: damage dealt by an enemy touching the player.
+- formationScore: points for a player killing this enemy while it is in formation. Proposed values from the user's observations: red 30, green 40, yellow 60. This replaces the earlier flat scorePerKill.
+Following prompt 009, propose three EnemyConfig assets (red, green, yellow) using the same EnemyController. This supersedes the earlier one-type starting scope. Prompt 010 confirms one-hit kills for all three, both in formation and attacking. Their different scores do not imply different durability or attack patterns.
+
+Scoring (ScoringConfig, proposed in prompt 009)
+- attackMinMultiplier: 4 by default.
+- attackMaxMultiplier: 10 by default; no lower than the minimum multiplier.
+- scoreRoundingStep: 10 points by default; positive integer.
+Use clamped vertical progress from a fixed formation-bottom line to a fixed player danger line. Attacking kills use formationScore * lerp(attackMinMultiplier, attackMaxMultiplier, progress), rounded to the nearest scoreRoundingStep. Formation kills use the base score. No level-number multiplier. Scene coordinates are supplied separately from reusable config assets. See docs/scoring-proposal.txt for the exact formula, examples and award semantics. This is a proposed approximation, not a measured original-game formula.
+
+Waves (WaveConfig)
+- attackStartDelaySeconds: initial delay before selecting formation enemies to move.
+- attackIntervalSeconds: baseline interval between selecting existing formation enemies to attack, not between creating enemies.
+- maxConcurrentAttackers: limit on enemies simultaneously in their attacking state.
+- interWaveDelaySeconds: break between stages before placing the next full formation.
+Formation positions are authored as scene slot transforms, separate from the Enemies parent. Count is derived from those slots rather than duplicated in config: the opening reference formation is 41 enemies in rows of 2, 5, 7, 9, 9 and 9. The proposed first implementation reuses this shape each level. Remove the earlier count-growth settings; difficulty is controlled through attack scheduling. Exact attack timing, offscreen behavior and later-level layouts remain unverified.
+
+Difficulty (WaveConfig)
+- difficultyIncreasePerWave: additive increase to a multiplier starting at 1.
+- maxDifficultyMultiplier: upper bound on that multiplier.
+Proposed calculation: min(1 + (wave - 1) * difficultyIncreasePerWave, maxDifficultyMultiplier). Divide attack-selection intervals by this value. Keep enemy attack speed fixed; shorter intervals allow more overlapping attacks up to maxConcurrentAttackers. Player values stay unchanged. All intervals must remain positive. Tune conservatively through play-testing; the bounded multiplier and concurrent-attacker cap prevent unlimited escalation. Enemy health and formation count do not scale in the initial version. Enemy firing has not been verified; do not assume it as reference behavior.
+
+Effects (FeedbackConfig)
+Polish-phase work only, after core gameplay is working. Per prompt 004, implement effects programmatically using Unity primitives/built-in features and Codex-written code; no external or AI-generated artwork, including image-generation tools available through Codex.
+- screenShakeIntensity: 0..1 global scale; 0 completely disables camera shake.
+- screenShakeDurationSeconds: duration of a shake impulse.
+- hitFlashIntensity: 0..1 scale for brief ship hit flashes; 0 disables them.
+- hitFlashDurationSeconds: duration of a ship hit flash.
+- screenFlashIntensity: 0..1 scale for any screen-wide damage overlay; default 0 (off).
+- screenFlashDurationSeconds: duration if a screen-wide flash is enabled.
+- explosionParticleAmount: 0..1 scale; 0 disables decorative explosion particles.
+- backgroundMotionIntensity: 0..1 scale for decorative scrolling/parallax; 0 gives a static background.
+Use restrained initial values and validate in play-testing. Zero values must suppress the underlying effect, including already-active shake/flash effects when preferences change. Essential gameplay feedback remains available through health, a steady invulnerability outline and sound.
+
+Audio (FeedbackConfig)
+- masterVolume: 0..1.
+- sfxVolume: 0..1.
+Add musicVolume only if music is actually implemented; it is not part of the initial scope.
+
+Ownership and scope
+- Runtime score, current health, current wave, cooldown timers, spawned entities and transient effect state are not stored in any config asset.
+- If a player-facing settings panel is added, it overrides these effect/audio defaults through separate runtime/persisted preferences. Do not change the shared ScriptableObject asset when the player adjusts settings. Restart must preserve those preferences.
+- Prefab, sprite, audio-clip, collider and scene references stay on the relevant components/prefabs. References between config assets are explicit as described above. Playfield limits come from the scene/camera.
+- No settings-menu implementation is requested by the current question; Inspector tuning is sufficient for the proposed config.

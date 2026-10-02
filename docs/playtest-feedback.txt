@@ -1,0 +1,116 @@
+SPACE ATTACK - COLLECTED PLAY-TEST FEEDBACK
+
+Status: the main batch was implemented after authorization in prompt 022; prompt 025 adds the final side-border and attacker-only firing corrections. Earlier "record only", "current behavior" and proposed-value notes preserve the feedback as collected; they are historical. Current behavior and defaults are in README.md. docs/verification.txt records the test results, rendered review images and audio-output measurements. The applicant's next personal play-test and listening review remain for them to perform.
+Sources:
+- docs/prompts/013-playtest-instructions-and-settings.txt
+- docs/prompts/014-playtest-hud-and-energy-bar.txt
+- docs/prompts/015-playtest-random-enemy-direction-changes.txt
+- docs/prompts/016-playtest-score-text-contrast.txt
+- docs/prompts/017-playtest-stage-contacts-overlay.txt
+- docs/prompts/018-playtest-formation-motion-and-enemy-shooting.txt
+- docs/prompts/020-playtest-firing-sounds-and-audio-levels.txt
+- docs/prompts/021-playtest-firing-sound-inaudible.txt
+- docs/prompts/022-effects-clarification-and-implementation-approval.txt
+- docs/prompts/025-final-side-lines-and-attacker-only-fire.txt
+
+1. Instruction screen copy
+- Remove "HOLD THE LINE. MAKE EVERY SHOT COUNT." The tone should be plain and functional, without marketing copy.
+- Put each control on its own line, for example:
+  A/D or arrow keys to move
+  Hold Space to fire
+- Remove "Every enemy takes one hit" and "Dodge the diagonal attackers." These mechanics are apparent during play.
+
+2. Scoring guidance
+- Hide all instructions explaining points so the player can discover scoring through play.
+- Remove the red/green/yellow base-score legend and the attacking-enemy multiplier/proximity explanation.
+- Include the HUD hint "LOWER ATTACKERS / HIGHER REWARDS" when removing scoring guidance.
+- Keep the scoring mechanics and visible score feedback; this request concerns explanatory instructions. Prompt 016 separately requests better floating-score legibility.
+- Do not substitute a new proximity-scoring tip now. If scoring guidance is restored later, describe points as being awarded, not paid or earned as currency.
+
+3. Individual effect settings and pause
+- Add a simple in-game settings menu that pauses gameplay while it is open and resumes the prior game state when closed.
+- Let the player adjust individual effect settings, including screen shake, rather than relying solely on a grouped effects toggle.
+- Current behavior: F toggles one reduced-visual-effects preset; M separately toggles sound. Individual effect values already exist in FeedbackConfig, but there is no in-game settings menu.
+- Existing configuration categories relevant to the future menu include screen shake, hit flash, screen flash, explosion particles and background motion. Exact menu controls and layout remain to be designed in the implementation batch.
+
+4. HUD title and stage display (prompt 014)
+- Use the actual game title "Space Attack" without a slash between the words.
+- Remove the remaining-enemy count ("X REMAIN") and its separating slash from the top HUD; retain the current stage number.
+- The count is unnecessary in a single-screen game, and the current "STAGE 01 / 04 REMAIN" layout can be mistaken for remaining stages.
+
+5. Text over the enemies (prompts 014 and 017)
+- Remove the "STAGE XX / X CONTACTS" announcement below the top blue line when a stage starts. It overlaps the enemy formation and duplicates the stage number already shown above the line.
+- Keep the stage number above the blue line.
+- Also remove the subsequent "LOWER ATTACKERS / HIGHER REWARDS" hint, as already requested in prompt 014.
+- Keep the wave-completion / sector-clear message announcing the next formation for now. Removing the other status messages must not remove this transition message.
+- Code inspection confirms that both the stage/contact announcement and "SECTOR CLEAR / NEXT FORMATION INCOMING" use HUDView.statusText through Announce. Preserve the shared element for the sector-clear transition while removing the unwanted messages.
+
+6. Energy bar (prompt 014)
+- Replace the "Hull" label with "Energy" and add an actual visual energy bar.
+- Give the bar a fixed overall width and display current health divided by maximum health as its fill amount.
+- With the default three health points, show full, two-thirds, one-third and empty as hits are taken.
+- Maximum health is already configurable through PlayerConfig.maxHealth (currently 3). The display must also work correctly when that maximum changes; do not hard-code three as the denominator or change the bar's overall width.
+- This is a presentation change to existing health, not a request to add energy regeneration or upgrades.
+
+7. Lower-right control hints (prompt 014)
+- Keep these hints, move them farther to the right, and arrange controls on separate rows so they do not extend as far toward the middle of the screen.
+- User's example:
+  A / D or ARROW KEYS - MOVE
+  SPACE - FIRE
+- Apply the same one-control-per-line approach already requested for the start-screen instructions.
+
+8. Random enemy direction changes (prompt 015)
+- Attacking enemies can switch between down-left and down-right during their descent instead of retaining their initial direction for the whole attack.
+- After an enemy has been moving for a certain duration, give it a small random chance to change direction.
+- Increase that chance as the enemy spends longer moving, adding some unpredictability to attacks.
+- Preserve diagonal-only downward movement and constant movement speed when switching direction.
+- This supersedes the earlier fixed-initial-direction assumption. The user's observation is that enemies in the reference game can change direction during an attack.
+- Exact delay, probability and rate of increase remain to be chosen and tuned during the implementation batch.
+- Record only for now, alongside the other pending feedback.
+
+9. Floating-score contrast (prompt 016)
+- Keep the floating kill scores. The user likes them and finds they help players discover how proximity affects scoring.
+- Improve their readability over groups of enemies; red score text currently blends into red enemies.
+- Use a consistent text treatment that contrasts with all three enemy colors: yellow, green and red.
+- Proposed treatment: white text with a dark outline. The outline separates the white lettering from bright enemies, especially yellow, while white remains visible against the dark playfield.
+- Check readability over each enemy color and dense formations during the later implementation/play-test batch.
+- Record this with the other pending feedback; no implementation yet.
+
+10. Horizontal formation movement (prompt 018)
+- Move the enemies still in formation together slowly left and right between horizontal X limits, reversing at the limits and preserving their relative formation positions.
+- Expose the horizontal range and movement speed in configuration, and increase formation movement speed as difficulty progresses.
+- Keep the complete formation visible within the playfield throughout its movement.
+- This supersedes the assumption that enemies waiting in formation remain stationary. An enemy that leaves formation continues its separate diagonal attack behavior, including the direction changes requested in prompt 015.
+- Proposed config placement: formation range, base movement speed and bounded difficulty scaling in WaveConfig. Exact tuning values remain for the implementation batch.
+
+11. Enemy shooting (prompt 018)
+- Enemies must fire projectiles vertically downward that can damage the player, in addition to their existing contact damage.
+- Use a fixed, configurable interval between shots. The cooldown must not depend on how soon a previous projectile exits the screen or is removed.
+- Do not reproduce the observed reference behavior of immediately replacing a projectile when it exits, or require a strict one-projectile-per-enemy limit.
+- Maintain the fixed firing interval even when an enemy is near the bottom of the screen, so its proximity does not create a rapid stream of bullets.
+- Tune the interval and projectile speed to leave opportunities to move underneath enemies and fire at them; validate this in play-testing.
+- Use a separate enemy WeaponConfig asset for shot interval, projectile speed, damage and lifetime, referenced by EnemyConfig. Player weapon tuning stays independent.
+- Prompt 018 makes enemy shooting a requested feature; earlier notes treating it as optional or awaiting reference clarification are superseded.
+- These are additional pending changes in the ongoing review. Continue collecting feedback until the user asks to implement the batch.
+
+12. Firing sounds and overall audio level (prompts 020 and 021)
+- Make both player and enemy laser firing clearly audible, with distinct sounds so the player can tell them apart.
+- Increase the overall game sound level substantially; the user currently finds the sounds too quiet to hear clearly.
+- The user reports that player firing is not audible (prompt 021). Treat this as a firing-audio defect to investigate and fix, rather than claiming the sound works because its code exists.
+- Code inspection shows a generated player-firing clip and an event path intended to play it. Actual audibility has not been verified by listening. Low configured levels may contribute, but the cause has not been established in the running game. Verify playback and audibility in Unity before considering this resolved. Enemy shooting and its distinct sound are pending additions.
+- Current implementation: FeedbackController handles sound alongside visual feedback and creates one non-spatial AudioSource. It plays all three generated clips through PlayOneShot. There is no separate audio manager or custom AudioMixer/group routing.
+- Shared source volume is FeedbackConfig.masterVolume * FeedbackConfig.sfxVolume, currently 0.45 * 0.55 = 0.2475. This is a linear amplitude multiplier, not a perceived-loudness percentage.
+- The generated clips have additional waveform amplitude settings: 0.12 for firing, 0.25 for an enemy kill and 0.35 for player damage, followed by a short fade envelope. Player firing lasts only 0.055 seconds. These factors further reduce the output.
+- The existing shared source/config controls already provide one place to raise all sound levels. Rebalance individual generated sounds as needed so firing is audible alongside hit sounds, and check overlapping shots during the later play-test. A mixer/manager refactor is not required solely for a volume increase and has not been requested as a definite architecture change.
+- Continue generating all sound effects through Codex-written code. Record only during this feedback phase; no audio or configuration changes yet.
+
+13. Player invulnerability and lower boundary line (prompt 022)
+- Preserve the existing enemy destruction particle effect.
+- Replace the blue rectangular invulnerability outline with player alpha switching between 1 and approximately 0.5 on a configurable interval for the duration of invulnerability. Restore full opacity afterward.
+- The lower line has no blink logic or enemy-crossing trigger. It is currently parented to the drifting starfield. Its subpixel thickness combined with that movement can explain visual shimmer; damage shake also moves the camera. Separate the boundary lines from the moving stars and give them a stable visible thickness.
+- Prompt 022 authorizes implementation of all collected changes after the explanation above.
+
+14. Final small corrections (prompt 025)
+- Remove both long vertical blue side lines from the scene entirely. The lower horizontal boundary remains.
+- Enemies must not fire while waiting in formation. Only enemies that have begun a diagonal attack may fire; the formation's horizontal sway does not count as beginning an attack.
+- Keep the existing configurable firing cooldown. The initial cooldown may elapse in formation, but firing remains blocked until attack begins.

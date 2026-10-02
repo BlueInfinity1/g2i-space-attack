@@ -1,0 +1,1 @@
+What would you include in the game config? Is it possible to turn down effects such as screen shake and flashes through that? Can you list what you would propose to include in this game config object?

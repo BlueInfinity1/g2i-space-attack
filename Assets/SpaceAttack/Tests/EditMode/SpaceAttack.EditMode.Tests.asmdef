@@ -1,0 +1,6 @@
+{
+  "name": "SpaceAttack.EditMode.Tests",
+  "references": ["SpaceAttack.Runtime"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

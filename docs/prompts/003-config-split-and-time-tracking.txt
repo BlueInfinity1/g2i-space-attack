@@ -1,0 +1,5 @@
+Weapons — separate player/enemy settingsShot interval, projectile speed, damage and lifetime &#x20;
+So can you tell me why you decided to use just a single config object instead of making different configs for, for example, player, enemy, and general configuration? That said, this is quite a small game, so I think we'll be fine with just one config, but for the sake of extending this, I think it might be a good idea to split the configs into pieces. Let me know what you think.&#x20;
+
+
+Also, how are you doing the time tracking for the active time logging? Because this needs to be active time that I'm working, not the time that you are working. So I'm not quite sure how you are able to measure that accurately.

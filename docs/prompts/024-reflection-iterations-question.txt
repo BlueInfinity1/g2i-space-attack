@@ -1,0 +1,5 @@
+Vastaa lomakekysymykseen: Describe one or two iterations and their effect on the game.
+
+Meillä oli kaksi iteraatiota sinänsä: Alun suuninittelu, ja lopun iso revisioiteraatio.
+
+Lopputulema: Pelin polish-taso parani merkittävästi ja pieniä vikoja core-logiikassa korjattiin.

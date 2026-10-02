@@ -1,0 +1,9 @@
+# AGENTS.md instructions
+
+<INSTRUCTIONS>
+Jos annan Full Access -oikeudet, käytä niitä silti ainoastaan nykyisessä workspacessa työskentelemiseen. Käytä korkeintaan Docker-komentoja sun muita, jos niitä tarvitaan workspacen projektissa.
+
+Vältä desktruktiivisia toimenpiteitä, kuten tiedostojen poistoja, jos mahdollista. Älä koskaan poista mitään workspacen ulkopuolelta.
+
+Vastaa lyhyesti ja tiiviisti viesteihini, älä tuota enempää tekstiä kuin tarpeellista.
+</INSTRUCTIONS>

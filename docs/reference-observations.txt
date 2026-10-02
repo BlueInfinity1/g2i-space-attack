@@ -1,0 +1,32 @@
+SPACE ATTACK REFERENCE - LIMITED VISUAL REVIEW
+
+Source: https://www.youtube.com/watch?v=jYIC8ADIArc
+Visible title: Space Attack Longplay (Emerson Arcadia 2001 Game)
+Visible channel: RetroGamingLoft
+Access: the earlier text-fetch attempts failed; the reference loaded through the browser during prompt 008. Opening frames were inspected at 0:00, 0:05 and approximately 0:09. The whole 4:45 video has not been reviewed.
+
+Formation visible at 0:05 (top to bottom):
+      Y   Y
+    R R R R R
+  G G G G G G G
+R R R R R R R R R
+R R R R R R R R R
+R R R R R R R R R
+
+Y = yellow; R = red; G = green.
+Row counts: 2 + 5 + 7 + 9 + 9 + 9 = 41 enemies.
+On a nine-column grid numbered 0 through 8, the top pair occupies columns 3 and 5, the five-enemy row occupies 2 through 6, the seven-enemy row occupies 1 through 7, and each full row occupies 0 through 8.
+The complete shape is visible in the opening sequence. The approximately 0:09 frame shows enemies already leaving it. No conclusion about every later level's layout is claimed.
+
+Confirmed user constraints from prompts 007 and 008:
+- Every stage begins with the entire enemy formation already visible.
+- Selected existing enemies move only diagonally down-left or down-right at constant speed; never straight down.
+- Prompt 010: the user observes that all enemies die in one hit. Adopt one-hit kills for every enemy color, formation/attacking state and level. This requirement does not imply that the player also dies in one hit.
+
+Implementation proposal:
+- Match the observed opening shape using Unity primitives and 41 authored scene slots.
+- Reuse this shape each level initially; make stages harder through attack cadence, retaining fixed movement speed.
+- Use the observed colors for readability. Prompt 009 supplies proposed distinct base-score values: red 30, green 40, yellow 60. These are the user's tentative observations, not independently verified score measurements. The user reports much larger scores for moving enemies, increasing as they descend; the precise original formula remains unknown. See docs/scoring-proposal.txt for a proposed approximation.
+
+Still unverified: precise angle/speed, exact attack timing/selection, formation-wide motion, later-level layouts, offscreen handling, and whether enemies fire. These notes do not claim continuous playback analysis or a complete behavioral reproduction.
+No reference artwork was imported or generated; the video was viewed only as a reference.

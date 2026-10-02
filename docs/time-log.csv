@@ -1,0 +1,2 @@
+"entry_type","started_utc","ended_utc","applicant_active_minutes","reported_by","notes"
+"unconfirmed","","","","","Applicant active time is unknown. Prior measurements were assistant sessions; see assistant-session-log.csv and time-tracking.txt."

@@ -1,0 +1,5 @@
+{
+  "name": "SpaceAttack.PlayMode.Tests",
+  "references": ["SpaceAttack.Runtime", "Unity.ugui"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

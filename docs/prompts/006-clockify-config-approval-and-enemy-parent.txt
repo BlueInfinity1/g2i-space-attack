@@ -1,0 +1,1 @@
+As for the time recording, yes, I will use my own time tracking via Clockify to see how much time I'm using. And let's do the split to different config categories, like you suggest. I think it's clearer even though we have a small game. One question about the scene contents: where would the enemies be spawned? Should we have a parent object for all the enemies?

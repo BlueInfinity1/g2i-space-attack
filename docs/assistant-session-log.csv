@@ -1,0 +1,3 @@
+"session","started_utc","ended_utc","assistant_elapsed_seconds","assistant_rounded_minutes","activity","notes"
+"1","2026-10-02T07:33:36.0000000+00:00","2026-10-02T07:36:21.1918204+00:00","166","3","Workspace inspection, architecture proposal, prompt capture","Historical assistant session wall time, not applicant active time. Original note: Rounded up to whole minutes. Implementation not started. Time between turns is not active work."
+"2","2026-10-02T07:53:08.0000000+00:00","2026-10-02T07:54:42.2562028+00:00","95","2","GameConfig proposal, effect controls and prompt capture","Historical assistant session wall time, not applicant active time. Original note: Rounded up to whole minutes. Implementation not started. Time between turns is not active work."

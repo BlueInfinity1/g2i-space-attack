@@ -1,0 +1,1 @@
+And just to clarify, did you interpret the instructions in the same way that I did, that we should not be generating any art, even if it is through Codex? So, would it be justified in your opinion to just stick with the primitives that we are having in the Unity?

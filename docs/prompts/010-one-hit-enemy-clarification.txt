@@ -1,0 +1,4 @@
+Award points once per kill; nonlethal hits give no points.
+
+
+Did you plan on having enemies that take, I mean, more than one hit to kill? From what I saw in the video, all enemies are destroyed in one hit. So can you please clarify what you had in mind for this?

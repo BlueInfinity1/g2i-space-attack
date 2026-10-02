@@ -1,0 +1,5 @@
+I think it's okay that the formula for scoring doesn't exactly reflect the original game, as long as it makes sense. Our proposed formula does make sense. Instead of trying to figure out and clone the original game's exact formula, I think we should be sticking to this formula. So I think with this decision we are actually ready to start coding the game.
+
+So can you start proceeding as per our plan? I will check your work and we'll iterate when you're done.
+
+We'll test in Unity editor first, so do not build this for WebGL yet.
